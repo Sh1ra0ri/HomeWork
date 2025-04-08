@@ -1,0 +1,29 @@
+[project]
+name = "homework"
+version = "0.1.0"
+description = ""
+authors = [
+    { name = "Sh1ra0ri", email = "xxnon.7@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+packages = [
+    { include = "homework" }
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+line-length = 88
+
+[tool.mypy]
+files = "homework"
+ignore_missing_imports = true
