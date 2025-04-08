@@ -2,10 +2,6 @@ import pytest
 
 from src.widget import mask_account_card, get_date
 
-@pytest.fixture
-def dates() -> str:
-    return "2018-09-12T21:27:25.241689"
-
 @pytest.mark.parametrize(
     "data, result",
     [

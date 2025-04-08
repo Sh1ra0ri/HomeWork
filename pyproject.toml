@@ -1,20 +1,20 @@
-[project]
+[tool.poetry]
 name = "homework"
 version = "0.1.0"
 description = ""
-authors = [
-    { name = "Sh1ra0ri", email = "xxnon.7@gmail.com" }
-]
+authors = ["Sh1ra0ri <xxnon.7@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = []
+packages = [{ include = "homework" }]
+python = ">=3.13"
 
-packages = [
-    { include = "homework" }
-]
+[tool.poetry.dependencies]
+
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.4"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core>=2.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]
