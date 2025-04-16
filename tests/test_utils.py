@@ -11,7 +11,7 @@ def sample_transaction_json() -> dict:
     return {
         "id": 12345,
         "operationAmount": {"amount": "8221.37", "currency": {"code": "USD"}},
-        "description": "Test Transaction"
+        "description": "Test Transaction",
     }
 
 
@@ -26,8 +26,6 @@ def mock_api_response() -> Mock:
     }
     return mock_response
 
-
-# -----------------------------------------------------
 
 def test_read_transactions_success(sample_transaction_json: dict) -> None:
     file_content = json.dumps([sample_transaction_json])
@@ -57,8 +55,6 @@ def test_read_transactions_json_not_list() -> None:
         assert result == []
 
 
-# -----------------------------------------------------
-
 @pytest.mark.parametrize(
     "currency_code, amount_str, expected_sum",
     [
@@ -66,11 +62,16 @@ def test_read_transactions_json_not_list() -> None:
         ("USD", "10.00", 900.0),
         ("EUR", "20.00", 2000.0),
         ("XYZ", "100.00", 100.00),
-    ]
+    ],
 )
 @patch("requests.get")
-def test_transaction_sum_json_format(mock_get: Mock, mock_api_response: Mock, currency_code: str, amount_str: str,
-                                     expected_sum: float) -> None:
+def test_transaction_sum_json_format(
+    mock_get: Mock,
+    mock_api_response: Mock,
+    currency_code: str,
+    amount_str: str,
+    expected_sum: float,
+) -> None:
     mock_get.return_value = mock_api_response
 
     transaction = {
@@ -86,11 +87,16 @@ def test_transaction_sum_json_format(mock_get: Mock, mock_api_response: Mock, cu
         ("RUB", "150.75", 150.75),
         ("USD", "10.0", 900.0),
         ("XYZ", "200.0", 200.0),
-    ]
+    ],
 )
 @patch("requests.get")
-def test_transaction_sum_other_file_type(mock_get: Mock, mock_api_response: Mock, currency_code: str, amount_str: str,
-                                         expected_sum: float) -> None:
+def test_transaction_sum_other_file_type(
+    mock_get: Mock,
+    mock_api_response: Mock,
+    currency_code: str,
+    amount_str: str,
+    expected_sum: float,
+) -> None:
     mock_get.return_value = mock_api_response
 
     transaction = {"currency_code": currency_code, "amount": amount_str}
@@ -100,7 +106,9 @@ def test_transaction_sum_other_file_type(mock_get: Mock, mock_api_response: Mock
 
 
 @patch("requests.get")
-def test_transaction_sum_api_error(mock_get: Mock, sample_transaction_json: dict) -> None:
+def test_transaction_sum_api_error(
+    mock_get: Mock, sample_transaction_json: dict
+) -> None:
     mock_get.side_effect = requests.exceptions.Timeout("API request timed out")
 
     result = transaction_sum(sample_transaction_json)

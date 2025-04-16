@@ -37,10 +37,14 @@ def test_log_error(capsys):
     assert result is None
 
     captured = capsys.readouterr()
-    assert "divide error: ZeroDivisionError" in captured.err or \
-           "divide error: ZeroDivisionError" in captured.out
+    assert (
+        "divide error: ZeroDivisionError" in captured.err
+        or "divide error: ZeroDivisionError" in captured.out
+    )
+
 
 def test_my_function():
     from src.decorators import my_function
+
     result = my_function(1, 2)
     assert result == 3

@@ -41,9 +41,7 @@ def read_transactions(file_path: Path) -> List[Dict[str, Any]]:
 def transaction_sum(transaction: Dict[str, Any], file_type: str = "json") -> float:
     """Возвращает сумму транзакции в рублях."""
     try:
-        response = requests.get(
-            "https://www.cbr-xml-daily.ru/daily_json.js", timeout=5
-        )
+        response = requests.get("https://www.cbr-xml-daily.ru/daily_json.js", timeout=5)
         data = response.json()
 
         if file_type == "json":
