@@ -1,53 +1,69 @@
 import json
 import os
 import requests
+import logging
 from pathlib import Path
-from typing import List, Dict, Any
 from dotenv import load_dotenv
+from typing import List, Dict, Any
+
+logger = logging.getLogger("utils")
+logger.setLevel(logging.INFO)
+
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
+if not API_KEY:
+    logger.warning("API_KEY не найден в переменных окружения.")
+
 
 def read_transactions(file_path: Path) -> List[Dict[str, Any]]:
-    """функция, которая принимает на вход путь до JSON-файла и возвращает список словарей с данными"""
+    """Читает файл и возвращает данные как список."""
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, "r", encoding="utf-8") as file:
             data = json.load(file)
             if isinstance(data, list):
+                logger.info("Файл прочитан.")
                 return data
-            else:
-                return []
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Ошибка при чтении файла {file_path}: {e}")
+            logger.warning(f"Файл {file_path} не содержит корректных данных.")
+            return []
+    except Exception as e:
+        logger.error(f"Ошибка при чтении файла {file_path}: {e}")
         return []
 
-def transaction_sum(transaction: dict, file_type: str = "json") -> float:
-    """функция, которая принимает на вход транзакцию и возвращает сумму транзакции в рублях,"""
-    url = "https://api.apilayer.com/exchangerates_data/convert"
-    headers = {"apikey": API_KEY}
 
-    if file_type == "json":
-        currency_code = transaction["operationAmount"]["currency"]["code"]
-        amount = float(transaction["operationAmount"]["amount"])
-    else:
-        currency_code = transaction["currency_code"]
-        amount = float(transaction["amount"])
-
-    if currency_code == "RUB":
-        return amount
-
-    params = {"from": currency_code, "to": "RUB", "amount": amount}
-
+def transaction_sum(transaction: Dict[str, Any], file_type: str = "json") -> float:
+    """Возвращает сумму транзакции в рублях."""
     try:
-        response = requests.get(url, headers=headers, params=params)
-        response_data = response.json()
+        response = requests.get("https://www.cbr-xml-daily.ru/daily_json.js", timeout=5)
+        data = response.json()
 
-        if response.status_code == 200:
-            return response_data.get('result', None)
+        if file_type == "json":
+            if transaction["operationAmount"]["currency"]["code"] == "RUB":
+                amount = float(transaction["operationAmount"]["amount"])
+                currency = 1.0
+            else:
+                valute = transaction["operationAmount"]["currency"]["code"]
+                currency = data["Valute"].get(valute, {}).get("Value", 1.0)
+                amount = float(transaction["operationAmount"]["amount"])
         else:
-            print(f"Ошибка запроса API: {response_data.get('error', 'Неизвестная ошибка')}")
-            return None
+            if transaction.get("currency_code") == "RUB":
+                amount = float(transaction["amount"])
+                currency = 1.0
+            else:
+                valute = transaction.get("currency_code")
+                currency = data["Valute"].get(valute, {}).get("Value", 1.0)
+                amount = float(transaction["amount"])
+
+        logger.info("Функция выполнена")
+        return amount * currency
 
     except requests.exceptions.RequestException as e:
-        print(f"Ошибка при запросе к API: {e}")
-        return None
+        logger.error(f"Ошибка при запросе к API: {e}")
+        return 0.0
